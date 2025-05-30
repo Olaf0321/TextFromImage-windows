@@ -3,3 +3,7 @@ venv
 *.png
 *.jpeg
 *.gif
+*.zip
+*.docx
+*.csv
+_MAXCOSX
