@@ -112,18 +112,33 @@ def extract_asin_from_text_BO(text):
 
 def extract_asin(img):
     asin = ''
-    crop = crop_by_ratio(img, 0.3, 0.8, 0, 0.3)
-    text = pytesseract.image_to_string(crop, lang='jpn', config='--psm 6')
-
-    if 'B0' in text:
-        asin = extract_asin_from_text_B0(text)
-    if 'BO' in text and not asin:
-        asin = extract_asin_from_text_BO(text)
-        if (asin != ''):
-            asin = asin[0] + '0' + asin[2:]
-            
+    for i in np.arange(0.4, 0.7, 0.03):
+        cropped = crop_by_ratio(img, i, i + 0.05, 0.01, 1)
+        text = pytesseract.image_to_string(cropped, lang='jpn', config='--psm 6')
+        # print(f'ROI text (y={i:.2f}): ', text)
+        if 'B0' in text:
+            asin = extract_asin_from_text_B0(text)
+            break
+        if 'BO' in text:
+            asin = extract_asin_from_text_BO(text)
+            if (asin != ''):
+                asin = asin[0] + '0' + asin[2:]
+            break
     if (len(asin) == 11):
-        asin = 'B0' + asin[3:]
+        asin = asin[:2] + asin[3:]
+    if (len(asin) < 10):
+        for i in np.arange(0.4, 0.7, 0.03):
+            cropped = crop_by_ratio(img, i, i + 0.05, 0.01, 0.5)
+            text = pytesseract.image_to_string(cropped, lang='jpn', config='--psm 6')
+            # print(f'ROI text (y={i:.2f}): ', text)
+            if 'B0' in text:
+                asin = extract_asin_from_text_B0(text)
+                break
+            if 'BO' in text:
+                asin = extract_asin_from_text_BO(text)
+                if (asin != ''):
+                    asin = asin[0] + '0' + asin[2:]
+                break
     return asin
 
 def extract_section_single_line(text, start_keyword, end_keyword, remove_phrase, exclude_prefixes):
